@@ -36,17 +36,17 @@ public class ArchitectureController {
         if (connected) {
             architectureService.logMongoDBStats();
             return ResponseEntity.ok(new HealthResponse(
-                    true,
-                    "MongoDB connection is healthy",
-                    architectureService.getAllArchitectures().size()
+                true,
+                "MongoDB connection is healthy",
+                architectureService.getAllArchitectures().size()
             ));
         } else {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(new HealthResponse(
-                            false,
-                            "MongoDB connection failed",
-                            0
-                    ));
+                .body(new HealthResponse(
+                    false,
+                    "MongoDB connection failed",
+                    0
+                ));
         }
     }
 
@@ -267,6 +267,25 @@ public class ArchitectureController {
         }
         architectureService.deleteArchitecture(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Copy/Clone an architecture (for solution reconstruction)
+     */
+    @PostMapping("/{id}/copy")
+    public ResponseEntity<?> copyArchitecture(
+            @PathVariable String id,
+            @RequestBody(required = false) ArchitectureRequest request) {
+        try {
+            String newName = (request != null && request.getName() != null)
+                ? request.getName()
+                : null;
+            Architecture copied = architectureService.copyArchitecture(id, newName);
+            return ResponseEntity.status(HttpStatus.CREATED).body(copied);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     /**
