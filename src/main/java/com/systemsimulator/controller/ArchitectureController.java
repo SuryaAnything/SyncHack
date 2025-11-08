@@ -36,17 +36,17 @@ public class ArchitectureController {
         if (connected) {
             architectureService.logMongoDBStats();
             return ResponseEntity.ok(new HealthResponse(
-                true,
-                "MongoDB connection is healthy",
-                architectureService.getAllArchitectures().size()
+                    true,
+                    "MongoDB connection is healthy",
+                    architectureService.getAllArchitectures().size()
             ));
         } else {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new HealthResponse(
-                    false,
-                    "MongoDB connection failed",
-                    0
-                ));
+                    .body(new HealthResponse(
+                            false,
+                            "MongoDB connection failed",
+                            0
+                    ));
         }
     }
 
@@ -213,7 +213,7 @@ public class ArchitectureController {
      * Get architectures by user ID
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Architecture>> getArchitecturesByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<List<Architecture>> getArchitecturesByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(architectureService.getArchitecturesByUserId(userId));
     }
 
@@ -221,7 +221,7 @@ public class ArchitectureController {
      * Get architectures by question ID
      */
     @GetMapping("/question/{questionId}")
-    public ResponseEntity<List<Architecture>> getArchitecturesByQuestionId(@PathVariable Integer questionId) {
+    public ResponseEntity<List<Architecture>> getArchitecturesByQuestionId(@PathVariable String questionId) {
         return ResponseEntity.ok(architectureService.getArchitecturesByQuestionId(questionId));
     }
 
@@ -231,6 +231,30 @@ public class ArchitectureController {
     @GetMapping("/submitted")
     public ResponseEntity<List<Architecture>> getSubmittedArchitectures() {
         return ResponseEntity.ok(architectureService.getSubmittedArchitectures());
+    }
+
+    /**
+     * Update architecture (e.g., name)
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateArchitecture(
+            @PathVariable String id,
+            @RequestBody ArchitectureRequest request) {
+
+        var optionalArch = architectureService.getArchitectureById(id);
+        if (optionalArch.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Architecture not found: " + id));
+        }
+
+        Architecture arch = optionalArch.get();
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            arch.setName(request.getName().trim());
+            arch.setUpdatedAt(java.time.LocalDateTime.now());
+        }
+
+        Architecture updated = architectureService.saveArchitecture(arch);
+        return ResponseEntity.ok(updated);
     }
 
     /**
@@ -278,14 +302,14 @@ public class ArchitectureController {
     }
 
     public static class SubmitRequest {
-        private Integer userId;
-        private Integer questionId;
+        private String userId;
+        private String questionId;
 
-        public Integer getUserId() { return userId; }
-        public void setUserId(Integer userId) { this.userId = userId; }
+        public String getUserId() { return userId; }
+        public void setUserId(String userId) { this.userId = userId; }
 
-        public Integer getQuestionId() { return questionId; }
-        public void setQuestionId(Integer questionId) { this.questionId = questionId; }
+        public String getQuestionId() { return questionId; }
+        public void setQuestionId(String questionId) { this.questionId = questionId; }
     }
 
     public static class ComparisonRequest {

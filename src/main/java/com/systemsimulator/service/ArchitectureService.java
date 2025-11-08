@@ -109,7 +109,7 @@ public class ArchitectureService {
     /**
      * Submit architecture to MongoDB with userId and questionId
      */
-    public Architecture submitArchitecture(String architectureId, Integer userId, Integer questionId) {
+    public Architecture submitArchitecture(String architectureId, String userId, String questionId) {
         logger.info("========== SUBMIT ARCHITECTURE STARTED ==========");
         logger.info("Architecture ID: {}", architectureId);
         logger.info("User ID: {}", userId);
@@ -185,14 +185,14 @@ public class ArchitectureService {
     /**
      * Get architectures by user ID
      */
-    public List<Architecture> getArchitecturesByUserId(Integer userId) {
+    public List<Architecture> getArchitecturesByUserId(String userId) {
         return architectureRepository.findByUserId(userId);
     }
 
     /**
      * Get architectures by question ID
      */
-    public List<Architecture> getArchitecturesByQuestionId(Integer questionId) {
+    public List<Architecture> getArchitecturesByQuestionId(String questionId) {
         return architectureRepository.findByQuestionId(questionId);
     }
 
